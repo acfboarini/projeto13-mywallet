@@ -5,14 +5,13 @@ import joi from "joi";
 import { MongoClient } from "mongodb";
 
 const app = express();
-
 app.use(json());
 app.use(cors());
 
 let db = null;
 const mongoClient = new MongoClient("mongodb://localhost:27017");
 mongoClient.connect()
-.then(response => {
+.then(() => {
     db = mongoClient.db("myWalletDB");
     console.log(chalk.bold.blue("Conectado ao banco myWalletDB"));
 })
@@ -47,10 +46,10 @@ app.post("/cadastro", async (req, res) => {
             return;
         }
         await db.collection("usuarios").insertOne(new_cadastro);
-        res.sendStatus(201);
+        res.status(201).send("Cadastrado com Sucesso");
         return;
     } catch (err) {
-        res.status(402);
+        res.sendStatus(500);
     }
 })
 
@@ -67,47 +66,18 @@ app.post("/login", async (req, res) => {
         const validate = loginSchema.validate(login);
         if (validate.error) {
             res.sendStatus(400);
+            return;
         }
         const isUser = await db.collection("usuarios").findOne({email: email, senha: senha});
         if (!isUser) {
             res.sendStatus(404);
             return;
         }
-        res.status(201).send("usuario logado");
+        res.status(201).send("Sucesso no Login");
         return;
     } catch (err) {
         console.log(err);
-        res.status(402).send(err);
-    }
-})
-
-const transationSchema = joi.object({
-    valor: joi.number().required(),
-    descricao: joi.string().required()
-})
-
-app.post("/entrada", (req, res) => {
-    const entrada = req.body;
-
-    try {
-        transationSchema.validate(entrada);
-        res.sendStatus(201);
-        console.log(entrada);
-        return;
-    } catch (err) {
-        res.sendStatus(402);
-    }
-})
-
-app.post("/saida", (req, res) => {
-    const saida = req.body;
-    try {
-        transationSchema.validate(saida);
-        res.sendStatus(201);
-        console.log(saida);
-        return;
-    } catch {
-        res.sendStatus(402);
+        res.sendStatus(500);
     }
 })
 
@@ -116,7 +86,32 @@ app.get("/historico", (req, res) => {
         //res.sendStatus(201).send(historico);
         return;
     } catch (err) {
-        res.sendStatus(409).send("erro ao buscar historico de transacoes");
+        res.sendStatus(500);
+    }
+})
+
+const transationSchema = joi.object({
+    valor: joi.string().required(),
+    descricao: joi.string().required()
+})
+
+app.post("/transation", (req, res) => {
+    const transation = req.body;
+    const {valor} = transation;
+
+    try {
+        const validate = transationSchema.validate(transation);
+        if (validate.error) {
+            res.sendStatus(400);
+            return;
+        }
+        console.log(typeof(valor));
+        //db.collection("transations").insertOne({id: id, ...transation});
+        db.collection("transations").insertOne({...transation, valor: parseFloat(valor)});
+        res.status(201).send("Transacao registrada com sucesso!");
+        return;
+    } catch (err) {
+        res.status(500).send("erro ao conectar com o banco");
     }
 })
 
@@ -132,7 +127,7 @@ app.get("/saldo", (req, res)=> {
         console.log(saldo);
         return;
     } catch (err) {
-        res.sendStatus(409).send("deu erro ao buscar o saldo");
+        res.sendStatus(500);
     }
 })
 
