@@ -4,7 +4,8 @@ import { db } from "./../dataBase.js";
 
 export async function postCadastro(req, res) {
     const new_cadastro = req.body;
-    const {email} = req.body;
+    console.log(new_cadastro);
+    const {name, email, senha} = req.body;
 
     const email_existente = await db.collection("usuarios").findOne({email: email});
     //console.log(email_existente);
@@ -17,16 +18,22 @@ export async function postCadastro(req, res) {
         name: joi.string().required(),
         email: joi.string().email().required(),
         senha: joi.string().required(),
-        confirm_senha: joi.ref("senha")
+        checkSenha: joi.ref("senha")
     });
     try {
         const validate = cadastroSchema.validate(new_cadastro);
         //console.log(validate.error);
         if (validate.error) {
             res.sendStatus(400);
+            console.log(validate.error);
             return;
         }
-        await db.collection("usuarios").insertOne({id: new Date().getTime(), ...new_cadastro});
+        await db.collection("usuarios").insertOne({
+            id: new Date().getTime(), 
+            name, 
+            email, 
+            senha
+        });
         res.status(201).send("Cadastrado com Sucesso");
         return;
     } catch (err) {

@@ -1,8 +1,11 @@
 import styled from "styled-components";
 
-export default function Input() {
+export default function Input({type, placeholder}) {
     return (
-        <Input2 type="text" placeholder="email"/>
+        <Input2 
+            type={type} 
+            placeholder={placeholder}
+        />
     )
 }
 
@@ -11,7 +14,6 @@ const Input2 = styled.input`
     height: 58px;
     background: #FFFFFF;
     border: 1px solid #D5D5D5;
-    box-sizing: border-box;
     border-radius: 5px;
     margin: 4px;
     font-size: 20px;

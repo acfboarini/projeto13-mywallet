@@ -1,16 +1,8 @@
 * {
     box-sizing: border-box;
+    font-family: 'Raleway', sans-serif;
 }
 
 body {
     background-color: #A328D6;
-}
-
-h1 {
-    width: 500px;
-    margin: 0px auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
