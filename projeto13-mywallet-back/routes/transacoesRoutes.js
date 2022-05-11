@@ -1,12 +1,11 @@
 import express from "express";
-import { getTransations, getSaldo, postTransitions } from "../controllers/transacoesController.js";
+import { getTransations, getSaldo, postTransations } from "../controllers/transacoesController.js";
+import { getUser } from "../middlewares/userMiddlewares.js";
 
 const transacoesRouter = express.Router();
 
-transacoesRouter.post("/transation", postTransitions);
-
-transacoesRouter.get("/saldo", getSaldo);
-
-transacoesRouter.get("/transations", getTransations);
+transacoesRouter.post("/transation", getUser, postTransations);
+transacoesRouter.get("/saldo", getUser, getSaldo);
+transacoesRouter.get("/transations", getUser, getTransations);
 
 export default transacoesRouter;

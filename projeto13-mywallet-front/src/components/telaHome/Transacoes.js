@@ -41,7 +41,7 @@ export default function Transacoes({transacoes}) {
             </ul>
             <Article>
                 <h1>SALDO</h1>
-                <Span isNegative={saldo < 0}>{saldo < 0? saldo*(-1) : saldo}</Span>
+                <Span isNegative={saldo < 0}>{saldo}</Span>
             </Article>
         </>   
     )

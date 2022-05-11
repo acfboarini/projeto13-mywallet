@@ -1,75 +1,55 @@
-import joi from "joi";
 import { db } from "./../dataBase.js";
+import transationSchema from "../schemas/transationSchemas.js";
 import dayjs from "dayjs";
 
 export async function getTransations(req, res) {
-    const {authorization} = req.headers;
-    const token = authorization?.replace("Bearer", "").trim();
 
-    const user = await db.collection("sessions").findOne({token: token});
-    if (!user) return res.sendStatus(404);
+    const {user} = res.locals;
     try {
-        const transacoes = await db.collection("transations").find({id: user.id}).toArray();
-        res.status(200).send(transacoes);
-    } catch (err) {
-        res.sendStatus(500);
+        const transacoes = await db.collection("transations").find({id: user._id}).toArray();
+        return res.status(200).send(transacoes.reverse());
+    } catch(err) {
+        return res.sendStatus(500);
     }
 }
 
-export async function postTransitions(req, res) {
+export async function postTransations(req, res) {
+
     const transation = req.body;
     const {valor} = transation;
-    const {authorization} = req.headers;
-    const token = authorization?.replace("Bearer", "").trim();
-
-    const transationSchema = joi.object({
-        type: joi.string().required(),
-        valor: joi.number().required(),
-        descricao: joi.string().required()
-    })
-
+    const {user} = res.locals;
     try {
         const validate = transationSchema.validate(transation);
-        if (validate.error) {
-            res.sendStatus(400);
-            return;
-        }
+        if (validate.error) return res.sendStatus(400);
 
-        const user = await db.collection("sessions").findOne({token: token});
-        if (!user) {
-            res.sendStatus(404);
-            return;
-        }
         const date = dayjs().format("DD/MM");
-        db.collection("transations").insertOne({id: user.id, date, ...transation, valor: parseFloat(valor)});
-        res.status(201).send("Transacao registrada com sucesso!");
-        return;
-    } catch (err) {
-        res.status(500).send("erro ao conectar com o banco");
+        await db.collection("transations").insertOne({
+            id: user._id, 
+            date, 
+            ...transation, 
+            valor: parseFloat(valor).toFixed(2)
+        });
+        return res.status(201).send("Transacao registrada com sucesso!");
+    } catch(err) {
+        return res.status(500).send("erro ao conectar com o banco");
     }
 }
 
 export async function getSaldo(req, res) {
-    const {authorization} = req.headers;
-    const token = authorization?.replace("Bearer", "").trim();
 
-    const user = await db.collection("sessions").findOne({token: token});
-    if (!user) {
-        res.sendStatus(404);
-        return;
-    }
-    try{
+    const {user} = res.locals;
+    try {
         let saldo = 0;
-        const transacoes = await db.collection("transations").find({id: user.id}).toArray();
+        let transacoes = await db.collection("transations").find({id: user._id}).toArray();
         transacoes.forEach(transacao => {
             if (transacao.type === "entrada") {
-                saldo += transacao.valor;
+                saldo += parseFloat(transacao.valor);
             } else {
-                saldo -= transacao.valor;
+                saldo -= parseFloat(transacao.valor);
             }
         });
-        res.status(200).send({saldo: saldo.toFixed(2)});
-    } catch (err) {
-        res.sendStatus(500);
+        return res.status(200).send({saldo: saldo.toFixed(2)});
+    } catch(err) {
+        return res.sendStatus(500);
     }
 }
