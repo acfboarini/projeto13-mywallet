@@ -8,6 +8,8 @@ import "./telaLogin.css";
 
 export default function TelaLogin() {
 
+    window.localStorage.clear();
+    
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
 
@@ -20,7 +22,11 @@ export default function TelaLogin() {
             senha
         }
         axios.post("http://localhost:5000/login", new_login)
-        .then(() => navigate("/home"))
+        .then(response => {
+            console.log(response);
+            window.localStorage.setItem("user", JSON.stringify(response.data));
+            navigate("/home");
+        })
         .catch(err => {
             alert("Erro ao fazer Login");
             console.log(err);

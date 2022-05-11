@@ -6,3 +6,9 @@
 body {
     background-color: #A328D6;
 }
+
+button {
+    background-color: #c94bff;
+    border: none;
+    cursor: pointer;
+}

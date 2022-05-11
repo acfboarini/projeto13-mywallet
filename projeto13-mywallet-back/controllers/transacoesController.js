@@ -1,14 +1,30 @@
 import joi from "joi";
 import { db } from "./../dataBase.js";
+import dayjs from "dayjs";
+
+export async function getTransations(req, res) {
+    const {authorization} = req.headers;
+    const token = authorization?.replace("Bearer", "").trim();
+
+    const user = await db.collection("sessions").findOne({token: token});
+    if (!user) return res.sendStatus(404);
+    try {
+        const transacoes = await db.collection("transations").find({id: user.id}).toArray();
+        res.status(200).send(transacoes);
+    } catch (err) {
+        res.sendStatus(500);
+    }
+}
 
 export async function postTransitions(req, res) {
     const transation = req.body;
-    const {valor, token} = transation;
+    const {valor} = transation;
+    const {authorization} = req.headers;
+    const token = authorization?.replace("Bearer", "").trim();
 
     const transationSchema = joi.object({
-        token: joi.string().required(),
         type: joi.string().required(),
-        valor: joi.string().required(),
+        valor: joi.number().required(),
         descricao: joi.string().required()
     })
 
@@ -24,7 +40,8 @@ export async function postTransitions(req, res) {
             res.sendStatus(404);
             return;
         }
-        db.collection("transations").insertOne({id: user.id, ...transation, valor: parseFloat(valor)});
+        const date = dayjs().format("DD/MM");
+        db.collection("transations").insertOne({id: user.id, date, ...transation, valor: parseFloat(valor)});
         res.status(201).send("Transacao registrada com sucesso!");
         return;
     } catch (err) {
@@ -33,7 +50,8 @@ export async function postTransitions(req, res) {
 }
 
 export async function getSaldo(req, res) {
-    const {token} = req.body;
+    const {authorization} = req.headers;
+    const token = authorization?.replace("Bearer", "").trim();
 
     const user = await db.collection("sessions").findOne({token: token});
     if (!user) {
@@ -42,9 +60,7 @@ export async function getSaldo(req, res) {
     }
     try{
         let saldo = 0;
-        console.log(user);
         const transacoes = await db.collection("transations").find({id: user.id}).toArray();
-        console.log(transacoes);
         transacoes.forEach(transacao => {
             if (transacao.type === "entrada") {
                 saldo += transacao.valor;
@@ -52,20 +68,7 @@ export async function getSaldo(req, res) {
                 saldo -= transacao.valor;
             }
         });
-        console.log(saldo);
-        res.status(200).send({saldo});
-    } catch (err) {
-        res.sendStatus(500);
-    }
-}
-
-export async function getHistorico(req, res) {
-    const {token} = req.body;
-    const user = await db.collection("sessions").findOne({token: token});
-    if (!user) return res.sendStatus(404);
-    try {
-        const transacoes = await db.collection("transations").find({id: user.id}).toArray();
-        res.status(200).send(transacoes);
+        res.status(200).send({saldo: saldo.toFixed(2)});
     } catch (err) {
         res.sendStatus(500);
     }

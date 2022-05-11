@@ -1,0 +1,81 @@
+.telaHome section {
+    width: 326px;
+}
+
+section.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topo h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.topo button {
+    background-color: #A328D6;
+}
+
+.topo button ion-icon {
+    font-size: 26px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+section.corpo {
+    position: relative;
+    width: 326px;
+    height: 446px;
+    padding: 0px 12px;
+    background: #FFFFFF;
+    border-radius: 5px;
+    margin-top: 22px;
+}
+
+.corpo > div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.corpo p {
+    font-size: 20px;
+    color: #868686;
+    text-align: center;
+}
+
+section.botoes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.botoes button {
+    position: relative;
+    width: 155px;
+    height: 114px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.botoes button ion-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #FFFFFF;
+    font-size: 22px;
+}
+
+.botoes button h2 {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    font-weight: 700;
+    font-size: 17px;
+    color: #FFFFFF;
+}
